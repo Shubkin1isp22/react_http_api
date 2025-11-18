@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-const API = axios.create({
+export const api = axios.create({
   baseURL: 'https://jsonplaceholder.typicode.com',
 });
 
-export const getPosts = () => API.get('/posts');
+export const getPosts = () => api.get('/posts');
+export const updatePost = (id, data) => api.put(`/posts/${id}`, data); 
+export const deletePost = (id) => api.delete(`/posts/${id}`);
