@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { updatePost } from './api/api';
+import { updatePost } from '../api/api';
 
 function EditPost({ post, onUpdate, onCancel }) {
   const [title, setTitle] = useState(post.title);
