@@ -30,19 +30,41 @@ function Posts() {
   if (loading) return <p>Загрузка...</p>;
 
   return (
-    <div className="container">
-      <h1>Посты сообщества:</h1>
+  <div className="container">
+
+    {/* Герой-блок / заголовок */}
+    <header className="blog-header">
+      <h1>Блог языковой школы “LinguaPro”</h1>
+      <p className="subtitle">
+        Полезные статьи, советы по изучению языков и материалы для практики 🇪🇸🇬🇧🇩🇪
+      </p>
+    </header>
+
+    {/* Форма добавления поста */}
+    <section className="add-post-section">
       <AddPost onAdd={handleAddPost} />
-      {editingPost && (
-        <EditPost
-          post={editingPost}
-          onUpdate={handleUpdatePost}
-          onCancel={() => setEditingPost(null)}
-        />
-      )}
-      <PostsList posts={posts} onEdit={setEditingPost} onDelete={handleDeletePost} />
-    </div>
-  );
+    </section>
+
+    {/* Форма редактирования */}
+    {editingPost && (
+      <EditPost
+        post={editingPost}
+        onUpdate={handleUpdatePost}
+        onCancel={() => setEditingPost(null)}
+      />
+    )}
+
+    
+    <section className="posts-section">
+      <h2>Все статьи</h2>
+      <PostsList
+        posts={posts}
+        onEdit={setEditingPost}
+        onDelete={handleDeletePost}
+      />
+    </section>
+  </div>
+);
 }
 
 export default Posts;

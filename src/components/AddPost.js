@@ -33,7 +33,7 @@ function AddPost({ onAdd }) {
 
   return (
     <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-      <h2>Добавить новый пост</h2>
+      <h2>Добавить новую статью</h2>
       <input
         type="text"
         placeholder="Заголовок"
