@@ -1,9 +1,11 @@
 
 import './App.css';
 import Posts from './Posts.js';
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import AboutPage from "./pages/AboutPage";
 import ContactsPage from "./pages/ContactsPage";
+import RandomPost from "./pages/RandomPost";
+import SearchPost from "./pages/SearchPosts";
 
 
 function App() {
@@ -17,18 +19,21 @@ function App() {
               <a href="/">Блог</a>
               <a href="/about">О школе</a>
               <a href="/contacts">Контакты</a>
+              <a href="/random">Случайная статья</a>
+              <a href="/search">Поиск статей</a>
             </nav>
           </div>
         </header>
         <Routes>
+          <Route path="/" element={<Posts />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contacts" element={<ContactsPage />} />
+          <Route path="/random" element={<RandomPost />} />
+          <Route path="/search" element={<SearchPost />} />
         </Routes>
       </Router> 
 
-      <main className="App">
-        <Posts />
-      </main>
+      
 
       <footer className="footer">
         <p>© 2025 LinguaPro — учебный блог для изучения языков</p>
