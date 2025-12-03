@@ -1,24 +1,40 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPosts } from '../api/api';
+import { queryClient } from '../queryClient';
 
 function RandomPost() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['randomPost'],
-    queryFn: async () => {
-      const res = await getPosts();
-      const posts = res.data;
-      return posts[Math.floor(Math.random() * posts.length)]; 
-    },
+  
+  useEffect(() => {
+    queryClient.prefetchQuery({
+      queryKey: ['posts'],
+      queryFn: getPosts,
+    });
+  }, []);
+
+  
+  const postsQuery = useQuery({
+    queryKey: ['posts'],
+    queryFn: getPosts,
   });
 
-  if (isLoading) return <p>Загрузка случайного поста...</p>;
-  if (error) return <p>Ошибка загрузки случайного поста</p>;
+  
+  const randomPostQuery = useQuery({
+    queryKey: ['randomPost'],
+    queryFn: () => {
+      const posts = postsQuery.data.data; 
+      return posts[Math.floor(Math.random() * posts.length)];
+    },
+    enabled: !!postsQuery.data, 
+  });
+
+  if (postsQuery.isLoading || randomPostQuery.isLoading) return <p>Загрузка случайного поста...</p>;
+  if (postsQuery.error || randomPostQuery.error) return <p>Ошибка загрузки случайного поста</p>;
 
   return (
     <div className="post-card">
-      <h3>{data.title}</h3>
-      <p>{data.body}</p>
+      <h3>{randomPostQuery.data.title}</h3>
+      <p>{randomPostQuery.data.body}</p>
     </div>
   );
 }

@@ -1,30 +1,28 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getPosts } from '../api/api';
-import '../App.css'; // используем стили из твоего проекта
+import '../App.css';
 
 function SearchPosts() {
   const [search, setSearch] = useState('');
 
-  
-  const { data: posts, isLoading, error } = useQuery({
-    queryKey: ['posts'],
-    queryFn: async () => {
-      const res = await getPosts();
-      return res.data;
+  const { data: filteredPosts = [], isLoading, error } = useQuery({
+    queryKey: ['posts'], 
+    queryFn: getPosts,    
+    staleTime: 1000 * 60, // 1 минута
+    select: (res) => {
+      if (!search) return [];
+      return res.data.filter(
+        (post) =>
+          post.title.toLowerCase().includes(search.toLowerCase()) ||
+          post.body.toLowerCase().includes(search.toLowerCase())
+      );
     },
+    enabled: search.length > 0, // выполняем только если есть текст поиска
   });
 
   if (isLoading) return <p>Загрузка постов...</p>;
   if (error) return <p>Ошибка загрузки постов</p>;
-
-  // Фильтруем по заголовку и тексту
-  const filteredPosts = posts.filter(
-    (post) =>
-      post.title.toLowerCase().includes(search.toLowerCase()) ||
-      post.body.toLowerCase().includes(search.toLowerCase())
-  );
 
   return (
     <div className="container">
@@ -51,7 +49,7 @@ function SearchPosts() {
           </div>
         ))
       ) : (
-        <p>Посты не найдены</p>
+        search.length > 0 && <p>Посты не найдены</p>
       )}
     </div>
   );

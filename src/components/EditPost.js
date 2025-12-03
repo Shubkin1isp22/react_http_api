@@ -12,10 +12,19 @@ function EditPost({ post, onSave, onCancel }) {
   return (
     <form onSubmit={handleSubmit} className="form-edit-post">
       <h3>Редактировать пост</h3>
-      <input className="input-post" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <textarea className="textarea-post" value={body} onChange={(e) => setBody(e.target.value)} />
-      <button className="edit" type="submit">Сохранить</button>
-      <button className="delete" type="button" onClick={onCancel}>Отмена</button>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        required
+      />
+      <textarea
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        required
+      />
+      <button type="submit">Сохранить</button>
+      <button type="button" onClick={onCancel}>Отмена</button>
     </form>
   );
 }
