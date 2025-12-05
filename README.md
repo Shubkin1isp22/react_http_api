@@ -1,70 +1,177 @@
-# Getting Started with Create React App
+# 📘 React Query Integration Documentation
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Этот проект был интегрирован с React Query (@tanstack/react-query) для оптимизации работы с серверными данными, сокращения количества сетевых запросов и улучшения UX.
 
-## Available Scripts
+Ниже описано, как была произведена интеграция, какие улучшения она дала и как устроена логика query key.
 
-In the project directory, you can run:
+# 🚀 Почему был выбран React Query
 
-### `npm start`
+До React Query логика получения данных выглядела так:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```useEffect(() => {
+  fetch('/api/posts')
+    .then(res => res.json())
+    .then(data => setPosts(data));
+}, []);
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## ❌ Минусы до интеграции:
+	•	Много ручного кода
+	•	Нет глобального кеша данных
+	•	Запросы выполнялись каждый раз при переходе по страницам
+	•	Не было автоматического обновления
+	•	Ошибки нужно было ловить вручную
+	•	Сложно поддерживать масштабируемость
 
-### `npm test`
+# ✅ Что изменилось после внедрения React Query
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+После внедрения появился единый центр управления данными — QueryClient:
 
-### `npm run build`
+```const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60,
+    },
+  },
+});
+```
+Теперь запрос:
+```
+const { data } = useQuery({
+  queryKey: ['posts'],
+  queryFn: getPosts,
+});
+```
+Даёт преимущества:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+✔ Кеширование данных
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Переходы между страницами мгновенные — данные берутся из кеша.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+✔ Автоматическое обновление данных
 
-### `npm run eject`
+По refetchInterval или вручную через invalidate.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+✔ Меньше дублирующих запросов
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+React Query не делает одинаковые параллельные запросы.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+✔ Глобальная обработка ошибок
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+Все ошибки попадают в один обработчик.
 
-## Learn More
+✔ Select, dependent queries, prefetch
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+— повышают производительность и UX.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+# 📂 Структура интеграции
 
-### Code Splitting
+### queryClient.js
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Здесь создаётся и настраивается QueryClient (retry, ошибки, devtools).
+```
+import { QueryClient } from '@tanstack/react-query';
 
-### Analyzing the Bundle Size
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      staleTime: 60 * 1000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+```
+# 🔑 Логика queryKey
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### [‘posts’]
 
-### Making a Progressive Web App
+Используется в списке постов, prefetch, invalidate.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Что кешируется: полный список постов
+Где используется: главная страница, SearchPosts, create/update/delete
 
-### Advanced Configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-### Deployment
+### [‘posts’, search]
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+Используется в компоненте поиска.
 
-### `npm run build` fails to minify
+### Что кешируется: отфильтрованный список по строке поиска
+### Почему так:
+	•	при каждом вводе в поле ключ меняется
+	•	React Query создаёт отдельную ячейку кеша
+	•	если тот же запрос уже делался — он мгновенный
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+
+# 🎛 Примеры оптимизаций
+
+## 1️⃣ Select (избежание лишних ререндеров)
+```
+select: (data) =>
+  data.map(post => ({ id: post.id, title: post.title })),
+```
+## 2️⃣ Prefetching
+```
+queryClient.prefetchQuery(['posts'], getPosts);
+```
+## 3️⃣ Dependent Query
+```
+enabled: !!userId
+```
+## 4️⃣ Retry логика
+```
+retry: 2
+```
+## 5️⃣ Глобальная обработка ошибок
+
+В queryClient:
+```
+queryCache: {
+  onError: (error, query) => {
+    toast.error(`Ошибка в запросе: ${query.queryKey}`);
+  },
+},
+```
+# 📊 Производительность: ДО vs ПОСЛЕ
+| Метрика                     | До React Query | После React Query |
+|-----------------------------|----------------|-----------------|
+| Повторные сетевые запросы   | 5–10 раз       | 0–1 (кеш)       |
+| Переходы между страницами   | медленные      | мгновенные      |
+| Обновление списка           | вручную        | автоматическое  |
+| Глобальная обработка ошибок | нет            | есть            |
+| Кеширование                 | нет            | есть            |
+| Тестирование запросов       | через браузер  | через DevTools  |
+
+# 🔧 React Query DevTools
+
+DevTools добавлены:
+```
+<ReactQueryDevtools initialIsOpen={false} />
+```
+## Позволяет видеть:
+	•	запросы
+	•	кеш
+	•	stale/fresh
+	•	ошибки
+	•	время жизни запросов
+
+# 📄 Итог
+
+### React Query полностью заменил ручную работу с fetch/useEffect и дал:
+
+✔ типизированный, централизованный доступ к данным
+✔ автоматическое обновление
+✔ мощное кеширование
+✔ упрощённые мутации
+✔ предзагрузку (prefetch)
+✔ зависимые запросы
+✔ глобальную обработку ошибок
+✔ DevTools для анализа сети
+
+# Cкриншот DevTools с активными запросами
+![DevTools](./readme_img/devtools.png "DevTools")
