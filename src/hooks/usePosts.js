@@ -4,7 +4,7 @@ import { getPosts, addPost, updatePost, deletePost } from '../api/api';
 export const usePosts = () => {
   const queryClient = useQueryClient();
 
-  // Получение постов с авто-обновлением
+  
   const postsQuery = useQuery({
     queryKey: ['posts'],
     queryFn: async () => (await getPosts()).data,
@@ -12,7 +12,7 @@ export const usePosts = () => {
     refetchInterval: 1000 * 60, 
   });
 
-  // Добавление поста (оптимистичное обновление)
+  
   const addPostMutation = useMutation({
     mutationFn: async (newPost) => (await addPost(newPost)).data,
     onMutate: async (newPost) => {

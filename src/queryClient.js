@@ -5,7 +5,7 @@ export const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60, 
       cacheTime: 1000 * 60 * 5, // 5 минут
-      retry: 2, // повторять запрос до 2 раз при ошибках
+      retry: 2, 
       retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000), 
       onError: (error) => {
         console.error('Глобальная ошибка запроса:', error);
@@ -13,7 +13,7 @@ export const queryClient = new QueryClient({
       },
     },
     mutations: {
-      retry: 1, // повторять мутацию 1 раз при ошибке
+      retry: 1, 
       onError: (error) => {
         console.error('Глобальная ошибка мутации:', error);
         
