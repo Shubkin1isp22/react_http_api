@@ -1,3 +1,4 @@
+// src/components/PostsList.js
 import React from 'react';
 
 function PostsList({ posts, onEdit, onDelete }) {
@@ -10,8 +11,12 @@ function PostsList({ posts, onEdit, onDelete }) {
           <h3 className="post-title">{post.title}</h3>
           <p className="post-body">{post.body}</p>
           <div className="post-actions">
-            <button className="edit" onClick={() => onEdit(post)}>Редактировать</button>
-            <button className="delete" onClick={() => onDelete(post.id)}>Удалить</button>
+            <button className="edit" onClick={() => onEdit(post)}>
+              Редактировать
+            </button>
+            <button className="delete" onClick={() => onDelete(post.id)}>
+              Удалить
+            </button>
           </div>
         </div>
       ))}

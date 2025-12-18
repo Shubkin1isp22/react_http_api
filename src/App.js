@@ -1,6 +1,6 @@
 
 import './App.css';
-import Posts from './Posts.js';
+import Posts from './pages/Posts/Posts';
 import { BrowserRouter as Router, Routes, Route} from "react-router-dom";
 import AboutPage from "./pages/AboutPage";
 import ContactsPage from "./pages/ContactsPage";
@@ -31,13 +31,14 @@ function App() {
           <Route path="/random" element={<RandomPost />} />
           <Route path="/search" element={<SearchPost />} />
         </Routes>
+        <footer className="footer">
+          <p>© 2025 LinguaPro — учебный блог для изучения языков</p>
+        </footer>
       </Router> 
 
       
 
-      <footer className="footer">
-        <p>© 2025 LinguaPro — учебный блог для изучения языков</p>
-      </footer>
+      
     </>
   );
 }

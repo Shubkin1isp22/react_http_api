@@ -1,13 +1,8 @@
 import axios from 'axios';
 
-export const api = axios.create({
-  baseURL: 'https://jsonplaceholder.typicode.com',
-});
+const API_URL = 'http://localhost:5001/api/posts'; // локальный api
 
-export const getPosts = () => api.get('/posts');
-export const updatePost = (id, data) => api.put(`/posts/${id}`, data); 
-export const deletePost = (id) => api.delete(`/posts/${id}`);
-export const addPost = (data) => api.post('/posts', data);
-
-export const getUsers = () => api.get('/users');
-export const getProfile = (userId) => api.get(`/users/${userId}`);
+export const getPosts = async () => await axios.get(API_URL);
+export const addPost = async (post) => await axios.post(API_URL, post);
+export const updatePost = async (id, data) => await axios.put(`${API_URL}/${id}`, data);
+export const deletePost = async (id) => await axios.delete(`${API_URL}/${id}`);
